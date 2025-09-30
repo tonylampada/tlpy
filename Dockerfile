@@ -28,12 +28,14 @@ RUN uv pip install \
     httpx \
     jupyter
 
-# Instalar ferramentas globais do Node
+# Instalar ferramentas globais do Node e AI assistants
 RUN npm install -g --force \
     pnpm \
     typescript \
     tsx \
-    @biomejs/biome
+    @biomejs/biome \
+    @anthropic-ai/claude-code \
+    @openai/codex
 
 # Instalar ferramentas de sistema úteis
 RUN apt-get update && apt-get install -y \
