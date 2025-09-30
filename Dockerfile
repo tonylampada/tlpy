@@ -49,6 +49,9 @@ RUN apt-get update && apt-get install -y \
 RUN wget -qO- https://github.com/eza-community/eza/releases/latest/download/eza_x86_64-unknown-linux-gnu.tar.gz | tar xz && \
     mv eza /usr/local/bin/
 
+# Configurar sudo sem senha para vscode (permite instalar pacotes facilmente)
+RUN echo "vscode ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
 # Configurar aliases úteis
 RUN echo 'alias ll="eza -la"' >> /home/vscode/.bashrc && \
     echo 'alias ls="eza"' >> /home/vscode/.bashrc && \
