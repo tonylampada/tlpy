@@ -1,6 +1,8 @@
 # tlpy - Python DevContainer
 
-Um Dockerfile otimizado para desenvolvimento Python com ferramentas modernas, perfeito para uso como DevContainer em projetos.
+Imagem Docker otimizada para desenvolvimento Python com ferramentas modernas e AI assistants, pronta para uso como DevContainer.
+
+🐳 **Docker Hub:** `tonylampada/tlpy:latest`
 
 ## 🚀 Características
 
@@ -34,7 +36,46 @@ Um Dockerfile otimizado para desenvolvimento Python com ferramentas modernas, pe
 - **jq** - Processador JSON
 - **tree** - Visualização de árvore de diretórios
 
+### 🤖 AI Assistants
+- **Claude Code** - AI assistant da Anthropic
+- **OpenAI Codex** - AI assistant da OpenAI
+
 ## 📦 Como Usar
+
+### Uso Rápido
+
+```bash
+# Baixar e executar a imagem
+docker pull tonylampada/tlpy:latest
+docker run -it --rm -v $(pwd):/workspace tonylampada/tlpy bash
+```
+
+### Com Docker Compose
+
+Crie um `docker-compose.yml` no seu projeto:
+
+```yaml
+services:
+  dev:
+    image: tonylampada/tlpy:latest
+    volumes:
+      - .:/workspace
+      # Montar credenciais dos AI assistants (se já autenticado)
+      - ~/.claude:/home/vscode/.claude:ro
+      - ~/.codex:/home/vscode/.codex:ro
+    environment:
+      # Se preferir usar API keys
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+    stdin_open: true
+    tty: true
+    command: bash
+```
+
+Depois execute:
+```bash
+docker-compose run --rm dev
+```
 
 ### Como DevContainer no VS Code
 
@@ -44,7 +85,7 @@ Um Dockerfile otimizado para desenvolvimento Python com ferramentas modernas, pe
 ```json
 {
   "name": "Python Dev Environment",
-  "dockerFile": "Dockerfile",
+  "image": "tonylampada/tlpy:latest",
   "customizations": {
     "vscode": {
       "extensions": [
@@ -56,26 +97,16 @@ Um Dockerfile otimizado para desenvolvimento Python com ferramentas modernas, pe
       ]
     }
   },
-  "postCreateCommand": "uv pip install -r requirements.txt",
-  "remoteUser": "vscode"
+  "postCreateCommand": "uv pip install -r requirements.txt || true",
+  "remoteUser": "vscode",
+  "mounts": [
+    "source=${localEnv:HOME}/.claude,target=/home/vscode/.claude,type=bind,consistency=cached",
+    "source=${localEnv:HOME}/.codex,target=/home/vscode/.codex,type=bind,consistency=cached"
+  ]
 }
 ```
 
-3. Copie o Dockerfile para `.devcontainer/Dockerfile`
-4. Reabra o projeto no container
-
-### Build Local
-
-```bash
-# Construir a imagem
-docker build -t python-devcontainer .
-
-# Executar um container
-docker run -it --rm -v $(pwd):/workspace python-devcontainer bash
-
-# Ou com docker-compose
-docker run -it --rm -v ${PWD}:/workspace -w /workspace python-devcontainer bash
-```
+3. Reabra o projeto no container (Ctrl+Shift+P → "Reopen in Container")
 
 ### Aliases Disponíveis
 
@@ -94,17 +125,45 @@ O container vem com aliases úteis pré-configurados:
 - **Automação** - Scripts e ferramentas CLI
 - **Testes** - Ambiente isolado para CI/CD
 
+## 🔐 Autenticação dos AI Assistants
+
+### Claude Code
+```bash
+# Primeira vez - autenticar na máquina host
+claude login
+
+# As credenciais ficam em ~/.claude/
+# O docker-compose.yml já monta esse diretório
+```
+
+### OpenAI Codex
+```bash
+# Primeira vez - autenticar na máquina host
+codex login
+
+# As credenciais ficam em ~/.codex/
+# O docker-compose.yml já monta esse diretório
+```
+
+### Alternativa: Usar API Keys
+```bash
+# Criar arquivo .env no seu projeto
+echo "ANTHROPIC_API_KEY=sk-ant-..." >> .env
+echo "OPENAI_API_KEY=sk-..." >> .env
+
+# O docker-compose.yml já está configurado para usar essas variáveis
+```
+
 ## 🔧 Customização
 
 Para adicionar mais ferramentas Python ao seu projeto:
 
 ```bash
-# Dentro do container
-uv pip install pandas numpy matplotlib
+# Dentro do container (com sudo)
+sudo uv pip install --system pandas numpy matplotlib
 
-# Ou adicione ao requirements.txt do seu projeto
-echo "pandas>=2.0.0" >> requirements.txt
-uv pip install -r requirements.txt
+# Ou para instalação local no projeto
+uv pip install pandas numpy matplotlib
 ```
 
 ## 📝 Notas
