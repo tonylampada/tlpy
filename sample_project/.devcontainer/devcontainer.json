@@ -1,0 +1,25 @@
+{
+  "name": "Python FastAPI Sample",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "dev",
+  "workspaceFolder": "/workspace",
+  "forwardPorts": [8000],
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "python.defaultInterpreter": "/usr/local/bin/python",
+        "python.linting.enabled": true,
+        "python.linting.ruffEnabled": true,
+        "python.formatting.provider": "black",
+        "python.testing.pytestEnabled": true,
+        "editor.formatOnSave": true
+      },
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "charliermarsh.ruff"
+      ]
+    }
+  },
+  "remoteUser": "vscode"
+}
