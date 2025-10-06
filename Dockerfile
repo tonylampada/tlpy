@@ -5,29 +5,6 @@ FROM mcr.microsoft.com/devcontainers/python:3.12
 RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - && \
     apt-get install -y nodejs
 
-# Instalar uv (gerenciador de pacotes Python rápido)
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
-    mv /root/.local/bin/uv /usr/local/bin/ && \
-    mv /root/.local/bin/uvx /usr/local/bin/ && \
-    echo 'export PATH="/usr/local/bin:$PATH"' >> /home/vscode/.bashrc && \
-    echo 'export PATH="/usr/local/bin:$PATH"' >> /home/vscode/.zshrc
-
-# Configurar uv para usar Python do sistema por padrão
-ENV UV_SYSTEM_PYTHON=1
-ENV PATH="/usr/local/bin:${PATH}"
-
-# Instalar ferramentas úteis para desenvolvimento Python
-RUN uv pip install \
-    ruff \
-    black \
-    mypy \
-    pytest \
-    pytest-cov \
-    ipython \
-    rich \
-    httpx \
-    jupyter
-
 # Instalar ferramentas globais do Node e AI assistants
 RUN npm install -g --force \
     pnpm \
@@ -53,6 +30,32 @@ RUN wget -qO- https://github.com/eza-community/eza/releases/latest/download/eza_
 
 # Configurar sudo sem senha para vscode (permite instalar pacotes facilmente)
 RUN echo "vscode ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+USER vscode
+
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> /home/vscode/.bashrc && \
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> /home/vscode/.zshrc
+
+# Configurar uv para usar Python do sistema por padrão
+ENV PATH="/home/vscode/.local/bin:${PATH}"
+RUN uv venv /home/vscode/.venv
+
+ENV VIRTUAL_ENV="/home/vscode/.venv" 
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+# Instalar ferramentas úteis para desenvolvimento Python
+RUN uv pip install \
+    ruff \
+    black \
+    mypy \
+    pytest \
+    pytest-cov \
+    ipython \
+    rich \
+    httpx \
+    jupyter
+
+
 
 # Configurar aliases úteis
 RUN echo 'alias ll="eza -la"' >> /home/vscode/.bashrc && \
